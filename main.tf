@@ -186,146 +186,132 @@ resource "aws_lambda_permission" "allow_bucket2" {
 
 
 
+#cria sns
+resource "aws_sns_topic" "user_updates" {
+  name = "email-notification-lalala"
 
 
+  delivery_policy = <<EOF
+{
+  "http": {
+    "defaultHealthyRetryPolicy": {
+      "minDelayTarget": 20,
+      "maxDelayTarget": 20,
+      "numRetries": 3,
+      "numMaxDelayRetries": 0,
+      "numNoDelayRetries": 0,
+      "numMinDelayRetries": 0,
+      "backoffFunction": "linear"
+    },
+    "disableSubscriptionOverrides": false,
+    "defaultThrottlePolicy": {
+      "maxReceivesPerSecond": 1
+    }
+  }
+}
+EOF
+}
 
 
+#sns topico
+resource "aws_sns_topic_policy" "default" {
+  arn = "${aws_sns_topic.user_updates.arn}"
 
 
+  policy = "${data.aws_iam_policy_document.sns-topic-policy.json}"
+}
 
 
+data "aws_iam_policy_document" "sns-topic-policy" {
+  policy_id = "__default_policy_ID"
 
 
+  statement {
+    actions = [
+      "SNS:Subscribe",
+      "SNS:SetTopicAttributes",
+      "SNS:RemovePermission",
+      "SNS:Receive",
+      "SNS:Publish",
+      "SNS:ListSubscriptionsByTopic",
+      "SNS:GetTopicAttributes",
+      "SNS:DeleteTopic",
+      "SNS:AddPermission",
+    ]
 
 
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceOwner"
 
 
-##cria sns
-# resource "aws_sns_topic" "user_updates" {
-#   name = "email-notification-lalala"
+      values = [
+        "arn:aws:iam::535327618565:dimitri",
+      ]
+    }
 
 
-#   delivery_policy = <<EOF
-# {
-#   "http": {
-#     "defaultHealthyRetryPolicy": {
-#       "minDelayTarget": 20,
-#       "maxDelayTarget": 20,
-#       "numRetries": 3,
-#       "numMaxDelayRetries": 0,
-#       "numNoDelayRetries": 0,
-#       "numMinDelayRetries": 0,
-#       "backoffFunction": "linear"
-#     },
-#     "disableSubscriptionOverrides": false,
-#     "defaultThrottlePolicy": {
-#       "maxReceivesPerSecond": 1
-#     }
-#   }
-# }
-# EOF
-# }
+    effect = "Allow"
 
 
-# #sns topico
-# resource "aws_sns_topic_policy" "default" {
-#   arn = "${aws_sns_topic.user_updates.arn}"
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
 
 
-#   policy = "${data.aws_iam_policy_document.sns-topic-policy.json}"
-# }
+    resources = [
+      "${aws_sns_topic.user_updates.arn}",
+    ]
 
 
-# data "aws_iam_policy_document" "sns-topic-policy" {
-#   policy_id = "__default_policy_ID"
-
-
-#   statement {
-#     actions = [
-#       "SNS:Subscribe",
-#       "SNS:SetTopicAttributes",
-#       "SNS:RemovePermission",
-#       "SNS:Receive",
-#       "SNS:Publish",
-#       "SNS:ListSubscriptionsByTopic",
-#       "SNS:GetTopicAttributes",
-#       "SNS:DeleteTopic",
-#       "SNS:AddPermission",
-#     ]
-
-
-#     condition {
-#       test     = "StringEquals"
-#       variable = "AWS:SourceOwner"
-
-
-#       values = [
-#         "arn:aws:iam::535327618565:dimitri",
-#       ]
-#     }
-
-
-#     effect = "Allow"
-
-
-#     principals {
-#       type        = "AWS"
-#       identifiers = ["*"]
-#     }
-
-
-#     resources = [
-#       "${aws_sns_topic.user_updates.arn}",
-#     ]
-
-
-#     sid = "__default_statement_ID"
-#   }
-# }
+    sid = "__default_statement_ID"
+  }
+}
 
 
 #######################################
 #cria instancia
-# resource "aws_instance" "example" {
-#   ami           = "ami-064a0193585662d74"
-#   instance_type = "t2.micro"
+resource "aws_instance" "example" {
+  ami           = "ami-064a0193585662d74"
+  instance_type = "t2.micro"
 
 
-#  key_name = "${aws_key_pair.my-key.key_name}" 
-#  security_groups = ["${aws_security_group.allow_ssh.name}"]
-#}
-#
-#resource "aws_key_pair" "my-key" {
+# key_name = "${aws_key_pair.my-key.key_name}" 
+ security_groups = ["${aws_security_group.allow_ssh.name}"]
+}
+
+# resource "aws_key_pair" "my-key" {
 #  key_name = "my-key"
 #  public_key = "${file("/home/vader/lalalaD.pub")}"
-#}
-# resource "aws_security_group" "allow_ssh" {
-#   name = "allow_ssh"
-#
-#   ingress {
-#     from_port   = 22
-#     to_port     = 22
-#     protocol    = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
 # }
+resource "aws_security_group" "allow_ssh" {
+  name = "allow_ssh"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 
 # output "example_public_dns" {
 #   value = "${aws_instance.example.public_dns}"
 # }
-#
 
 
-#bucket backend not work
+
+# bucket backend not work
 # terraform {
 #   backend "s3" {
 #     bucket  = "mybucket"
