@@ -5,11 +5,11 @@ provider "aws" {
   profile                 = "${var.profile}"
 }
 
-# module "lambda" {
-#   source           = "modules/lambda"
-#   LAMBDA_SETTINGS  = "${var.HELLO_LAMBDA["settings"]}"
-#   LAMBDA_VARIABLES = "${var.HELLO_LAMBDA["variables"]}"
-# }
+module "lambda" {
+  source           = "../terraform_production/modules/lambda"
+  LAMBDA_SETTINGS  = "${var.HELLO_LAMBDA["settings"]}"
+  LAMBDA_VARIABLES = "${var.HELLO_LAMBDA["variables"]}"
+}
 
 ##### cria lambda role
 resource "aws_iam_role" "iam_for_lambdalalala" {

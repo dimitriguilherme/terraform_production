@@ -15,7 +15,7 @@ variable "HELLO_LAMBDA" {
 
   default = {
     settings = {
-      function_name = "hello_lambda"
+      function_name = "hello_lambda-MODULE"
       handler       = "hello_lambda.lambda_handler"
       runtime       = "python3.6"
       source_file   = "hello_lambda.py"
